@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import 'styles/signIn.css';
 import axios from 'axios';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import TickrLogo from 'media/tickr_logo.png';
+import TickrLogo from 'media/tickr_logo_signup.png';
 
 const SignIn: React.FC = () => {
 	const [successful, setSuccessful] = useState<boolean>(false);
@@ -60,7 +61,7 @@ const SignIn: React.FC = () => {
 	};
 
 	return (
-		<div className='col-md-12'>
+		<div className='background'>
 			<div className='card card-container'>
 				<img
 					className='signup__logo'
@@ -111,6 +112,9 @@ const SignIn: React.FC = () => {
 										Log In
 									</button>
 								</div>
+								<a href='/signUp'>
+									<h3>Register</h3>
+								</a>
 							</div>
 						)}
 

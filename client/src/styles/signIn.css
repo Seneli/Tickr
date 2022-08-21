@@ -1,0 +1,57 @@
+.background {
+	height: 100vh;
+	background-image: url('../media/tickr_background.png');
+
+display: flex;
+align-items: center;
+justify-content: center;
+
+}
+
+.card.card-container {
+	/* height: 100vh; */
+	width: 80%;
+	width: 450px;
+	height: 640px;
+	text-align: center;
+	vertical-align: middle;
+	background-color: rgb(233, 224, 213);
+	/* border: brown solid 0.5px; */
+	box-shadow: grey 2px 5px 5px;
+	border-radius: 30px;
+}
+
+.signup__logo {
+	max-width: 400px;
+}
+
+label {
+	display: block;
+	padding: 10px;
+	font-size: 20px;
+	font-style: bold;
+}
+
+.form-group {
+	margin: 30px;
+}
+
+.form-control {
+	/* height: 40px; */
+	border: brown;
+	border-radius: 20px;
+	padding: 15px;
+	font-size: 20px;
+	text-align: center;
+}
+
+.btn.btn-primary.btn-block {
+	background-color: maroon;
+	border: none;
+	padding: 10px 35px;
+	border-radius: 15px;
+	font-size: 20px;
+	font-weight: 500;
+	color: white;
+	box-shadow: grey 2px 5px 5px;
+}

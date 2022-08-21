@@ -19,7 +19,6 @@ function App() {
 					</Route>
 
 					<Route path='/signIn'>
-						<Header backButton='/' />
 						<SignIn />
 					</Route>
 
