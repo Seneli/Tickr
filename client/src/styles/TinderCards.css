@@ -15,7 +15,7 @@
 	padding: 20px;
 	max-width: 85vw;
 	height: 70vh;
-	box-shadow: 0px 18px 53px 0px rgba(0, 0, 0, 0.3);
+	box-shadow: 0px 10px 15px 0px rgba(0, 0, 0, 0.1);
 	border-radius: 20px;
 	background-size: cover;
 	background-position: center;
@@ -30,6 +30,32 @@
 
 .companyProfile {
 	margin-top: 5vw;
+	font-size: 20px;
+}
+
+.analytics {
+	display: flex;
+	flex-direction: row;
+}
+
+.analyticsTitle {
+	font-size: 25px;
+	font-weight: bold;
+}
+
+.grid-container {
+	display: grid;
+	grid-template-columns: auto auto auto;
+}
+.grid-item {
+	padding: 20px;
+	font-size: 25px;
+	font-weight: bold;
+	text-align: center;
+}
+.grid-item.title {
+	padding-top: 0;
+	font-weight: normal;
 }
 
 .tinderCards__swipe {

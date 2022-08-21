@@ -1,8 +1,8 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import moment, { Moment } from 'moment';
-import TinderCard from 'react-tinder-card';
-import 'styles/TinderCards.css';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import moment, { Moment } from "moment";
+import TinderCard from "react-tinder-card";
+import "styles/TinderCards.css";
 
 interface Stock {
 	logoUrl: string;
@@ -46,12 +46,14 @@ function TinderCards() {
 	}
 
 	const [nextStack, fetchMore] = useState(<></>);
+	const [priceChanges, setPriceChanges] = useState({});
 	const [stocks, setStocks] = useState<Stock[]>([]);
 	const [marketNews, setMarketNews] = useState<MarketNewsStory[]>([]);
 	const [windowSize, setWindowSize] = useState(getWindowSize());
 	const [stockIndex, setStockIndex] = useState<number>(0);
 	const [companyNews, setCompanyNews] = useState<CompanyNewsStory[]>([]);
 	const [cardView, setCardView] = useState<number>(1);
+	const [analytics, setAnalytics] = useState({});
 	const MAX_CARD_VIEW = 4;
 	const MIN_CARD_VIEW = 1;
 
@@ -64,15 +66,15 @@ function TinderCards() {
 			(response: any) => {
 				console.log(response);
 				setMarketNews(response.data);
-				console.log('market news:', companyNews);
+				console.log("market news:", companyNews);
 			},
 			(error: any) => {}
 		);
-		getCompanyNews('AAPL') // HARD CODED!!
+		getCompanyNews("AAPL") // HARD CODED!!
 			.then(
 				(response: any) => {
 					setCompanyNews(response.data);
-					console.log('company news:', companyNews);
+					console.log("company news:", companyNews);
 				},
 				(error: any) => {}
 			);
@@ -84,7 +86,7 @@ function TinderCards() {
 				<button
 					onClick={() => {
 						axios
-							.get(`${process.env.REACT_APP_SERVER_URL}/tickers`)
+							.get(`${process.env.REACT_APP_SERVER_URL}tickers`)
 							.then((res) => {
 								console.log(res.data);
 								setStocks(res.data.companyProfilesArray);
@@ -99,23 +101,70 @@ function TinderCards() {
 	}, [stocks, stocks.length]);
 
 	const getMarketNews = async () => {
-		return axios.get(process.env.REACT_APP_SERVER_URL + 'getMarketNews');
+		return axios.get(process.env.REACT_APP_SERVER_URL + "getMarketNews");
 	};
 
 	const getCompanyNews = async (symbol: string) => {
-		return axios.get(process.env.REACT_APP_SERVER_URL + 'getCompanyNews', {
+		return axios.get(process.env.REACT_APP_SERVER_URL + "getCompanyNews", {
 			params: {
-				symbol: symbol
-			}
+				symbol: symbol,
+			},
 		});
 	};
 
+	const getRecTrends = async (symbol: string) => {
+		const recommendations = await axios.get(
+			process.env.REACT_APP_SERVER_URL + "getRecs",
+			{
+				params: {
+					symbol: symbol,
+				},
+			}
+		);
+		setAnalytics(recommendations.data);
+	};
+
+	const getHistoricalData = async (symbol: string) => {
+		const historicalData = await axios.get(
+			process.env.REACT_APP_SERVER_URL + "getHistoricalData",
+			{
+				params: {
+					symbol: symbol,
+				},
+			}
+		);
+		const firstClosed = historicalData.data.closed[90];
+		const oneWeek =
+			Math.round(
+				((firstClosed - historicalData.data.closed[83]) /
+					historicalData.data.closed[83]) *
+					100 *
+					100
+			) / 100;
+		const oneMonth =
+			Math.round(
+				((firstClosed - historicalData.data.closed[60]) /
+					historicalData.data.closed[60]) *
+					100 *
+					100
+			) / 100;
+		const threeMonths =
+			Math.round(
+				((firstClosed - historicalData.data.closed[0]) /
+					historicalData.data.closed[0]) *
+					100 *
+					100
+			) / 100;
+		// setAnalytics(recommendations.data);
+		setPriceChanges({ oneWeek, oneMonth, threeMonths });
+	};
+
 	const swiped = (direction: string, nameToDelete: string) => {
-		console.log('removing:' + nameToDelete);
+		console.log("removing:" + nameToDelete);
 	};
 
 	const outOfFrame = (name: string) => {
-		console.log(name + ' left the screen!');
+		console.log(name + " left the screen!");
 		setCardView(1);
 		setStockIndex(stockIndex + 1);
 	};
@@ -127,7 +176,7 @@ function TinderCards() {
 		} else {
 			if (cardView > MIN_CARD_VIEW) setCardView(cardView - 1);
 		}
-		console.log('market news: ', marketNews);
+		console.log("market news: ", marketNews);
 	};
 
 	const getFormattedDate = (epoch: EpochTimeStamp) => {
@@ -142,14 +191,18 @@ function TinderCards() {
 					<TinderCard
 						className='tinderCards__swipe'
 						key={stock.ticker}
-						preventSwipe={['up', 'down']}
+						preventSwipe={["up", "down"]}
 						onSwipe={(dir) => swiped(dir, stock.ticker)}
 						onCardLeftScreen={() => outOfFrame(stock.ticker)}
 					>
 						{cardView === 1 && (
 							<div
 								className='tinderCards__card card1'
-								onClick={(event) => changeCardView(event)}
+								onClick={(event) => {
+									changeCardView(event);
+									getRecTrends(stock.ticker);
+									getHistoricalData(stock.ticker);
+								}}
 							>
 								<img
 									className='stock__logo'
@@ -157,18 +210,86 @@ function TinderCards() {
 									alt={`${stock.ticker} logo`}
 								/>
 								<div className='companyProfile'>
-									<h3>{stock.ticker}</h3>
+									<h3 style={{ fontSize: "40px" }}>
+										{stock.ticker}
+									</h3>
 									<p>{`${stock.name} | ${stock.sector}`}</p>
-									<p>Market Cap: {stock.marketCap}</p>
+									<p>${stock.marketCap}B</p>
 								</div>
 							</div>
 						)}
 						{cardView === 2 && (
 							<div
-								className='tinderCards__card'
+								className='tinderCards__card card1'
 								onClick={(event) => changeCardView(event)}
 							>
-								<p>view 2</p>
+								<div className='analyticsTitle'>{`${stock.ticker} | ${stock.sector}`}</div>
+								<div className='grid-container'>
+									<div
+										className='grid-item'
+										style={{
+											color: "#8A1C1C",
+										}}
+									>
+										{analytics.sell}
+									</div>
+									<div className='grid-item'>
+										{analytics.hold}
+									</div>
+									<div
+										className='grid-item'
+										style={{
+											color: "#458D2C",
+										}}
+									>
+										{analytics.buy}
+									</div>
+									<div className='grid-item title'>sell</div>
+									<div className='grid-item title'>hold</div>
+									<div className='grid-item title'>buy</div>
+									<div
+										className='grid-item'
+										style={{
+											color:
+												priceChanges.oneWeek > 0
+													? "#458D2C"
+													: "#8A1C1C",
+										}}
+									>
+										{priceChanges.oneWeek}%
+									</div>
+									<div
+										className='grid-item'
+										style={{
+											color:
+												priceChanges.oneWeek > 0
+													? "#458D2C"
+													: "#8A1C1C",
+										}}
+									>
+										{priceChanges.oneMonth}%
+									</div>
+									<div
+										className='grid-item'
+										style={{
+											color:
+												priceChanges.oneWeek > 0
+													? "#458D2C"
+													: "#8A1C1C",
+										}}
+									>
+										{priceChanges.threeMonths}%
+									</div>
+									<div className='grid-item title'>
+										1 week
+									</div>
+									<div className='grid-item title'>
+										1 month
+									</div>
+									<div className='grid-item title'>
+										3 month
+									</div>
+								</div>
 							</div>
 						)}
 						{cardView === 3 && (
@@ -195,7 +316,9 @@ function TinderCards() {
 												>
 													<p>{story.headline}</p>
 												</a>
-												<p className="story source">{story.source}</p>
+												<p className='story source'>
+													{story.source}
+												</p>
 											</div>
 											<p className='story summary'>
 												{story.summary}
